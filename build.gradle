@@ -1,0 +1,29 @@
+plugins {
+    id "me.champeau.gradle.jmh" version "0.3.1"
+}
+
+group 'fada21.com'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+jmh {
+    // examples http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/
+    include = 'VariantsBenchmark.*'
+    iterations = 4
+    fork = 2
+    timeout = '4s'
+    warmupForks = 1
+    warmupIterations = 2
+}
+
