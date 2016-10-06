@@ -17,8 +17,9 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
+// https://github.com/melix/jmh-gradle-plugin
+// examples http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/
 jmh {
-    // examples http://hg.openjdk.java.net/code-tools/jmh/file/tip/jmh-samples/src/main/java/org/openjdk/jmh/samples/
     include = 'VariantsBenchmark.*'
     iterations = 4
     fork = 2

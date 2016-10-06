@@ -4,7 +4,13 @@ import java.util.*;
 
 public class VariantsCruncher {
 
-    public static Map<String, Ordered<Set<Ordered<String>>>> buildVariantsData(@NotNull final List<Variant> variants) {
+    Map<String, Ordered<Set<Ordered<String>>>> metaData;
+
+    public VariantsCruncher(@NotNull final List<Variant> variants) {
+        metaData = buildVariantsData(variants);
+    }
+
+    private Map<String, Ordered<Set<Ordered<String>>>> buildVariantsData(@NotNull final List<Variant> variants) {
         Map<String, Ordered<Set<Ordered<String>>>> matrix = new LinkedHashMap<>();
         for (Variant variant : variants) {
             for (Variant.Attribute attribute : variant.attributes) {
@@ -14,7 +20,7 @@ public class VariantsCruncher {
                         set.add(new Ordered<>(set.size(), attribute.value));
                     }
                 } else {
-                    Set<Ordered<String>> set = new HashSet<>();
+                    Set<Ordered<String>> set = new LinkedHashSet<>();
                     set.add(new Ordered<>(0, attribute.value));
                     matrix.put(attribute.type, new Ordered<>(matrix.size(), set));
                 }
@@ -23,7 +29,7 @@ public class VariantsCruncher {
         return matrix;
     }
 
-    public List<String> getSlice(String dimention) {
+    public List<String> getSlice(String type) {
         return null;
     }
 
@@ -70,40 +76,86 @@ public class VariantsCruncher {
 
     }
 
+    @Override
+    public String toString() {
+        return metaData.toString();
+    }
+
     public static void main(String[] args) {
+        List<Variant> variants = buildLongerVariantsList();
+
+        VariantsCruncher variantsCruncher = new VariantsCruncher(variants);
+
+        System.out.println(variantsCruncher);
+    }
+
+    private static List<Variant> buildSimpleVariantsList() {
         List<Variant> variants = new ArrayList<>();
         Variant v;
-        Variant.Attribute a;
 
         v = new Variant();
-        v.attributes = new ArrayList<>();
-        a = new Variant.Attribute();
-        a.type = "Colour";
-        a.value = "White";
-        v.attributes.add(a);
-        a = new Variant.Attribute();
-        a.type = "service";
-        a.value = "HomeDelivery";
-        v.attributes.add(a);
+        v.partNumber = 1;
+        addVariantAttribute(v, "Colour", "White");
+        addVariantAttribute(v, "service", "HomeDelivery");
         variants.add(v);
 
         v = new Variant();
-        v.attributes = new ArrayList<>();
-        a = new Variant.Attribute();
-        a.type = "Colour";
-        a.value = "White";
-        v.attributes.add(a);
+        addVariantAttribute(v, "Colour", "White");
         variants.add(v);
 
         v = new Variant();
-        v.attributes = new ArrayList<>();
-        a = new Variant.Attribute();
-        a.type = "Colour";
-        a.value = "White";
-        v.attributes.add(a);
+        addVariantAttribute(v, "Colour", "White");
+        variants.add(v);
+        return variants;
+    }
+
+    private static List<Variant> buildLongerVariantsList() {
+        List<Variant> variants = new ArrayList<>();
+        Variant v;
+
+        v = new Variant();
+        v.partNumber = 1;
+        addVariantAttribute(v, "Colour", "White");
+        addVariantAttribute(v, "service", "HomeDelivery");
         variants.add(v);
 
-        Map<String, Ordered<Set<Ordered<String>>>> variantsData = buildVariantsData(variants);
-        System.out.println(variantsData.toString());
+        v = new Variant();
+        v.partNumber = 2;
+        addVariantAttribute(v, "Colour", "White");
+        addVariantAttribute(v, "service", "Installation");
+        variants.add(v);
+
+        v = new Variant();
+        v.partNumber = 3;
+        addVariantAttribute(v, "Colour", "Black");
+        addVariantAttribute(v, "service", "HomeDelivery");
+        variants.add(v);
+
+        v = new Variant();
+        v.partNumber = 4;
+        addVariantAttribute(v, "Colour", "Black");
+        addVariantAttribute(v, "service", "Installation");
+        variants.add(v);
+
+        v = new Variant();
+        v.partNumber = 5;
+        addVariantAttribute(v, "Colour", "Red");
+        addVariantAttribute(v, "service", "HomeDelivery");
+        variants.add(v);
+
+        v = new Variant();
+        v.partNumber = 6;
+        addVariantAttribute(v, "Colour", "Red");
+        addVariantAttribute(v, "service", "Installation");
+        variants.add(v);
+        return variants;
+    }
+
+    private static void addVariantAttribute(Variant v, String type, String value) {
+        if (v.attributes == null) v.attributes = new ArrayList<>();
+        Variant.Attribute a = new Variant.Attribute();
+        a.type = type;
+        a.value = value;
+        v.attributes.add(a);
     }
 }
