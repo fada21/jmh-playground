@@ -82,7 +82,7 @@ public class VariantsCruncher {
     }
 
     public static void main(String[] args) {
-        List<Variant> variants = buildLongerVariantsList();
+        List<Variant> variants = buildExtraLongVariantsList();
 
         VariantsCruncher variantsCruncher = new VariantsCruncher(variants);
 
@@ -148,6 +148,34 @@ public class VariantsCruncher {
         addVariantAttribute(v, "Colour", "Red");
         addVariantAttribute(v, "service", "Installation");
         variants.add(v);
+        return variants;
+    }
+
+    private static List<Variant> buildExtraLongVariantsList() {
+        List<Variant> variants = new ArrayList<>();
+        Map<String, List<String>> variantsMap = new HashMap<>();
+        String colour = "Colour";
+        String size = "Size";
+        String delivery = "Delivery";
+        String pattern = "Pattern";
+        variantsMap.put(colour, Arrays.asList("Red", "Green", "Blue"));
+        variantsMap.put(size, Arrays.asList("XS", "S", "M", "L", "XL", "XXL", "XXXL"));
+        variantsMap.put(delivery, Arrays.asList("Standard", "Installation", "Fasttrack"));
+        variantsMap.put(pattern, Arrays.asList("WW", "XX", "OO", "NN"));
+        for (String colourVal : variantsMap.get(colour)) {
+            for (String sizeVal : variantsMap.get(size)) {
+                for (String deliveryVal : variantsMap.get(delivery)) {
+                    for (String patternVal : variantsMap.get(pattern)) {
+                        Variant variant = new Variant();
+                        addVariantAttribute(variant, colour, colourVal);
+                        addVariantAttribute(variant, size, sizeVal);
+                        addVariantAttribute(variant, delivery, deliveryVal);
+                        addVariantAttribute(variant, pattern, patternVal);
+                        variants.add(variant);
+                    }
+                }
+            }
+        }
         return variants;
     }
 
