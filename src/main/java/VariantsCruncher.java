@@ -5,28 +5,29 @@ import java.util.*;
 public class VariantsCruncher {
 
     Map<String, Ordered<Set<Ordered<String>>>> metaData;
+    List<String> matrix;
 
     public VariantsCruncher(@NotNull final List<Variant> variants) {
         metaData = buildVariantsData(variants);
     }
 
     private Map<String, Ordered<Set<Ordered<String>>>> buildVariantsData(@NotNull final List<Variant> variants) {
-        Map<String, Ordered<Set<Ordered<String>>>> matrix = new LinkedHashMap<>();
+        Map<String, Ordered<Set<Ordered<String>>>> matrixMeta = new LinkedHashMap<>();
         for (Variant variant : variants) {
             for (Variant.Attribute attribute : variant.attributes) {
-                if (matrix.containsKey(attribute.type)) {
-                    Set<Ordered<String>> set = matrix.get(attribute.type).content;
-                    if (!set.contains(new Ordered<>(0, attribute.value))) {
-                        set.add(new Ordered<>(set.size(), attribute.value));
+                if (matrixMeta.containsKey(attribute.type)) {
+                    Set<Ordered<String>> typesSet = matrixMeta.get(attribute.type).content;
+                    if (!typesSet.contains(new Ordered<>(0, attribute.value))) {
+                        typesSet.add(new Ordered<>(typesSet.size(), attribute.value));
                     }
                 } else {
-                    Set<Ordered<String>> set = new LinkedHashSet<>();
-                    set.add(new Ordered<>(0, attribute.value));
-                    matrix.put(attribute.type, new Ordered<>(matrix.size(), set));
+                    Set<Ordered<String>> valuesSet = new LinkedHashSet<>();
+                    valuesSet.add(new Ordered<>(0, attribute.value));
+                    matrixMeta.put(attribute.type, new Ordered<>(matrixMeta.size(), valuesSet));
                 }
             }
         }
-        return matrix;
+        return matrixMeta;
     }
 
     public List<String> getSlice(String type) {
@@ -158,20 +159,30 @@ public class VariantsCruncher {
         String size = "Size";
         String delivery = "Delivery";
         String pattern = "Pattern";
+        String quality = "Quality";
+        String type = "Type";
         variantsMap.put(colour, Arrays.asList("Red", "Green", "Blue"));
         variantsMap.put(size, Arrays.asList("XS", "S", "M", "L", "XL", "XXL", "XXXL"));
         variantsMap.put(delivery, Arrays.asList("Standard", "Installation", "Fasttrack"));
         variantsMap.put(pattern, Arrays.asList("WW", "XX", "OO", "NN"));
+        variantsMap.put(quality, Arrays.asList("Value", "Premium", "Best"));
+        variantsMap.put(type, Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I", "J"));
         for (String colourVal : variantsMap.get(colour)) {
             for (String sizeVal : variantsMap.get(size)) {
                 for (String deliveryVal : variantsMap.get(delivery)) {
                     for (String patternVal : variantsMap.get(pattern)) {
-                        Variant variant = new Variant();
-                        addVariantAttribute(variant, colour, colourVal);
-                        addVariantAttribute(variant, size, sizeVal);
-                        addVariantAttribute(variant, delivery, deliveryVal);
-                        addVariantAttribute(variant, pattern, patternVal);
-                        variants.add(variant);
+                        for (String qualityVal : variantsMap.get(quality)) {
+                            for (String typeVal : variantsMap.get(type)) {
+                                Variant variant = new Variant();
+                                addVariantAttribute(variant, colour, colourVal);
+                                addVariantAttribute(variant, size, sizeVal);
+                                addVariantAttribute(variant, delivery, deliveryVal);
+                                addVariantAttribute(variant, pattern, patternVal);
+                                addVariantAttribute(variant, quality, qualityVal);
+                                addVariantAttribute(variant, type, typeVal);
+                                variants.add(variant);
+                            }
+                        }
                     }
                 }
             }
