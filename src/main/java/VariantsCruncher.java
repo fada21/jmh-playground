@@ -4,66 +4,38 @@ import java.util.*;
 
 public class VariantsCruncher {
 
-    Map<String, Ordered<Set<Ordered<String>>>> metaData;
-    List<String> matrix;
+    private Map<String, Integer> variantTypes;
+    private List<Map<String, Integer>> variantValues = new ArrayList<>();
+    Matrix<String> matrix;
 
     public VariantsCruncher(@NotNull final List<Variant> variants) {
-        metaData = buildVariantsData(variants);
+        buildVariantsData(variants);
     }
 
-    private Map<String, Ordered<Set<Ordered<String>>>> buildVariantsData(@NotNull final List<Variant> variants) {
-        Map<String, Ordered<Set<Ordered<String>>>> matrixMeta = new LinkedHashMap<>();
+    private void buildVariantsData(@NotNull final List<Variant> variants) {
+        variantTypes = new HashMap<>();
         for (Variant variant : variants) {
             for (Variant.Attribute attribute : variant.attributes) {
-                if (matrixMeta.containsKey(attribute.type)) {
-                    Set<Ordered<String>> typesSet = matrixMeta.get(attribute.type).content;
-                    if (!typesSet.contains(new Ordered<>(0, attribute.value))) {
-                        typesSet.add(new Ordered<>(typesSet.size(), attribute.value));
+                if (variantTypes.containsKey(attribute.type)) {
+                    Integer typeIndex = variantTypes.get(attribute.type);
+                    Map<String, Integer> variantValuesWithIndex = variantValues.get(typeIndex);
+                    if (!variantValuesWithIndex.containsKey(attribute.value)) {
+                        variantValuesWithIndex.put(attribute.value, variantValuesWithIndex.size());
                     }
                 } else {
-                    Set<Ordered<String>> valuesSet = new LinkedHashSet<>();
-                    valuesSet.add(new Ordered<>(0, attribute.value));
-                    matrixMeta.put(attribute.type, new Ordered<>(matrixMeta.size(), valuesSet));
+                    int currentIndex = variantTypes.size();
+                    variantTypes.put(attribute.type, currentIndex);
+                    Map<String, Integer> values = new HashMap<>();
+                    values.put(attribute.value, 0);
+                    variantValues.add(currentIndex, values);
                 }
             }
         }
-        return matrixMeta;
+        matrix = new Matrix<>(variantTypes, variantValues);
     }
 
     public List<String> getSlice(String type) {
         return null;
-    }
-
-    public static class Ordered<T> {
-
-        public final int index;
-        public final T content;
-
-        public Ordered(int index, T content) {
-            this.index = index;
-            this.content = content;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Ordered<?> ordered = (Ordered<?>) o;
-
-            return content != null ? content.equals(ordered.content) : ordered.content == null;
-
-        }
-
-        @Override
-        public int hashCode() {
-            return content != null ? content.hashCode() : 0;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s[%d]", content.toString(), index);
-        }
     }
 
     public static class Variant {
@@ -79,15 +51,33 @@ public class VariantsCruncher {
 
     @Override
     public String toString() {
-        return metaData.toString();
+        return "Types: " + variantTypes.toString() + "  & values: \n" + variantValues.toString();
     }
 
     public static void main(String[] args) {
         List<Variant> variants = buildExtraLongVariantsList();
 
         VariantsCruncher variantsCruncher = new VariantsCruncher(variants);
-
+        System.out.println("Capacity: " + variantsCruncher.matrix.capacity());
         System.out.println(variantsCruncher);
+
+
+        String colour = "Colour";
+        String size = "Size";
+        String delivery = "Delivery";
+        String pattern = "Pattern";
+        String quality = "Quality";
+        String type = "Type";
+        Map<String, String> coordinates = new HashMap<>();
+        coordinates.put(colour, "Green");
+        coordinates.put(size, "S");
+        coordinates.put(delivery, "Installation");
+        coordinates.put(pattern, "XX");
+        coordinates.put(quality, "Premium");
+        coordinates.put(type, "B");
+        variantsCruncher.matrix.insert(coordinates, "Elem test");
+        System.out.println(variantsCruncher.matrix.get(coordinates));
+
     }
 
     private static List<Variant> buildSimpleVariantsList() {
