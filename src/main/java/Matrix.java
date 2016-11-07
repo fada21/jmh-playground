@@ -1,6 +1,7 @@
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,10 @@ public class Matrix<T> implements Iterable<T> {
     private int dimCount;
     private int[] dims;
     private final Object data;
+    private int size;
 
-    public Matrix(@NotNull final Map<String, Integer> variantTypes,
-                  @NotNull final List<Map<String, Integer>> variantValues) {
+    Matrix(@NotNull final Map<String, Integer> variantTypes,
+           @NotNull final List<Map<String, Integer>> variantValues) {
         if (variantTypes.size() == 0 || variantValues.size() == 0) {
             throw new IllegalArgumentException("Dimension size must be positive");
         }
@@ -46,15 +48,11 @@ public class Matrix<T> implements Iterable<T> {
         }
     }
 
-    public int[] dimentionSizes() {
-        return dims;
-    }
-
     public int dimentionCount() {
         return dimCount;
     }
 
-    public int capacity() {
+    int capacity() {
         int product = 1;
         for (int dim : dims) {
             product *= dim;
@@ -62,33 +60,69 @@ public class Matrix<T> implements Iterable<T> {
         return product;
     }
 
-    public void insert(Map<String, String> coordinates, T value) {
-        int[] indices = new int[dimCount];
-        for (String type : coordinates.keySet()) {
-            Integer typeIndex = variantTypes.get(type);
-            indices[typeIndex] = variantValues.get(typeIndex).get(coordinates.get(type));
-        }
-        insetrByIndices(value, indices);
+    int size() {
+        return size;
     }
 
-    private void insetrByIndices(T value, int[] indices) {
+    float fillRatio() {
+        return (float) size / capacity();
+    }
+
+    boolean insert(Map<String, String> coordinates, @NotNull T value) {
+        if (coordinates.size() != dimCount) return false;
+        int[] indices = new int[dimCount];
+        for (Map.Entry<String, String> entry : coordinates.entrySet()) {
+            Integer typeIndex = variantTypes.get(entry.getKey());
+            if (typeIndex == null) return false;
+            indices[typeIndex] = variantValues.get(typeIndex).get(entry.getValue());
+        }
+        return insertByIndices(value, indices);
+    }
+
+    boolean remove(Map<String, String> coordinates) {
+        if (coordinates.size() != dimCount) return false;
+        int[] indices = new int[dimCount];
+        for (Map.Entry<String, String> entry : coordinates.entrySet()) {
+            Integer typeIndex = variantTypes.get(entry.getKey());
+            if (typeIndex == null) return false;
+            indices[typeIndex] = variantValues.get(typeIndex).get(entry.getValue());
+        }
+        return insertByIndices(null, indices);
+    }
+
+    private boolean insertByIndices(@Nullable T value, int[] indices) {
         Object tempHolder = data;
         for (int i = 0, indicesLength = indices.length; i < indicesLength; i++) {
             int index = indices[i];
             if (i == indicesLength - 1) {
-                ((Object[]) tempHolder)[index] = value;
+                boolean doRemove = value == null;
+                boolean isCellEmpty = ((Object[]) tempHolder)[index] == null;
+                if (isCellEmpty && !doRemove) {
+                    size++;
+                    ((Object[]) tempHolder)[index] = value;
+                    return true;
+                } else if (!isCellEmpty && doRemove) {
+                    size--;
+                    ((Object[]) tempHolder)[index] = value;
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
                 tempHolder = ((Object[]) tempHolder)[index];
             }
         }
+        throw new IllegalStateException("Insert method should never reach that state");
     }
 
     @Nullable
     public T get(Map<String, String> coordinates) {
+        if (coordinates.size() != dimCount) return null;
         int[] indices = new int[dimCount];
-        for (String type : coordinates.keySet()) {
-            Integer typeIndex = variantTypes.get(type);
-            indices[typeIndex] = variantValues.get(typeIndex).get(coordinates.get(type));
+        for (Map.Entry<String, String> entry : coordinates.entrySet()) {
+            Integer typeIndex = variantTypes.get(entry.getKey());
+            if (typeIndex == null) return null;
+            indices[typeIndex] = variantValues.get(typeIndex).get(entry.getValue());
         }
         return getByIndices(indices);
     }
@@ -107,6 +141,26 @@ public class Matrix<T> implements Iterable<T> {
         return null;
     }
 
+    public List<T> getDimensionSlice(@NotNull Map<String, String> coordinates, String dimenType) {
+        int sliceDimenTypeIndex = 0;
+        int[] indices = new int[dimCount];
+        for (Map.Entry<String, String> entry : coordinates.entrySet()) {
+            String type = entry.getKey();
+            Integer typeIndex = variantTypes.get(type);
+            if (type.equals(dimenType)) sliceDimenTypeIndex = typeIndex;
+            if (typeIndex == null) return null;
+            indices[typeIndex] = variantValues.get(typeIndex).get(entry.getValue());
+        }
+
+        List<T> itemsDimenSlice = new ArrayList<>();
+        for (int i = 0, limit = dims[sliceDimenTypeIndex]; i < limit; i++) {
+            indices[sliceDimenTypeIndex] = i;
+            T item = getByIndices(indices);
+            itemsDimenSlice.add(item);
+        }
+        return itemsDimenSlice;
+    }
+
     @Override
     public Iterator<T> iterator() {
         return new MatrixIterator();
@@ -123,7 +177,7 @@ public class Matrix<T> implements Iterable<T> {
         }
 
         private boolean iterate(boolean justCheck) {
-            T item = getByIndices(indices);
+            T item = currItem = getByIndices(indices);
             while (item == null) {
                 if (!incrementIndices()) {
                     return false;
@@ -165,14 +219,10 @@ public class Matrix<T> implements Iterable<T> {
         @Override
         public void remove() {
             if (hasNext()) {
-                insetrByIndices(null, indices);
+                insertByIndices(null, indices);
                 incrementIndices();
             }
         }
-    }
-
-    public static void main(String[] args) {
-
     }
 
 }

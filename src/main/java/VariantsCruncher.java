@@ -1,12 +1,15 @@
 import com.sun.istack.internal.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class VariantsCruncher {
+public class VariantsCruncher<T> {
 
     private Map<String, Integer> variantTypes;
     private List<Map<String, Integer>> variantValues = new ArrayList<>();
-    Matrix<String> matrix;
+    private Matrix<T> matrix;
 
     public VariantsCruncher(@NotNull final List<Variant> variants) {
         buildVariantsData(variants);
@@ -34,8 +37,28 @@ public class VariantsCruncher {
         matrix = new Matrix<>(variantTypes, variantValues);
     }
 
-    public List<String> getSlice(String type) {
-        return null;
+    public boolean insert(@NotNull Map<String, String> coordinates, @NotNull T value) {
+        return matrix.insert(coordinates, value);
+    }
+
+    public T get(@NotNull Map<String, String> coordinates) {
+        return matrix.get(coordinates);
+    }
+
+    public boolean remove(@NotNull Map<String, String> coordinates) {
+        return matrix.remove(coordinates);
+    }
+
+    public int getVariantTypeCount() {
+        return matrix.dimentionCount();
+    }
+
+    @NotNull public Matrix<T> getMatrix() {
+        return matrix;
+    }
+
+    @NotNull public List<T> getDimensionSlice(@NotNull Map<String, String> coordinates, String type) {
+        return matrix.getDimensionSlice(coordinates, type);
     }
 
     public static class Variant {
@@ -46,168 +69,11 @@ public class VariantsCruncher {
             String type;
             String value;
         }
-
     }
 
     @Override
     public String toString() {
-        return "Types: " + variantTypes.toString() + "  & values: \n" + variantValues.toString();
+        return "Types: " + variantTypes.toString() + "\nValues: " + variantValues.toString();
     }
 
-    public static void main(String[] args) {
-        List<Variant> variants = buildExtraLongVariantsList();
-
-        VariantsCruncher variantsCruncher = new VariantsCruncher(variants);
-        System.out.println("Capacity: " + variantsCruncher.matrix.capacity());
-        System.out.println(variantsCruncher);
-
-//        String colour = "Colour";
-//        String delivery = "service";
-//        Map<String, String> coordinates = new HashMap<>();
-//        coordinates.put(colour, "White");
-//        coordinates.put(delivery, "Installation");
-//        variantsCruncher.matrix.insert(coordinates, "Elem test");
-//        System.out.println(variantsCruncher.matrix.get(coordinates));
-
-
-
-        String colour = "Colour";
-        String size = "Size";
-        String delivery = "Delivery";
-        String pattern = "Pattern";
-        String quality = "Quality";
-        String type = "Type";
-        Map<String, String> coordinates = new HashMap<>();
-        coordinates.put(colour, "Green");
-        coordinates.put(size, "S");
-        coordinates.put(delivery, "Installation");
-        coordinates.put(pattern, "XX");
-        coordinates.put(quality, "Premium");
-        coordinates.put(type, "B");
-        variantsCruncher.matrix.insert(coordinates, "Elem test");
-        System.out.println(variantsCruncher.matrix.get(coordinates));
-
-        coordinates = new HashMap<>();
-        coordinates.put(colour, "Red");
-        coordinates.put(size, "XL");
-        coordinates.put(delivery, "Installation");
-        coordinates.put(pattern, "NN");
-        coordinates.put(quality, "Value");
-        coordinates.put(type, "F");
-        variantsCruncher.matrix.insert(coordinates, "Second");
-
-        for (String s : variantsCruncher.matrix) {
-            System.out.println(s);
-        }
-
-
-    }
-
-    private static List<Variant> buildSimpleVariantsList() {
-        List<Variant> variants = new ArrayList<>();
-        Variant v;
-
-        v = new Variant();
-        v.partNumber = 1;
-        addVariantAttribute(v, "Colour", "White");
-        addVariantAttribute(v, "service", "HomeDelivery");
-        variants.add(v);
-
-        v = new Variant();
-        addVariantAttribute(v, "Colour", "White");
-        variants.add(v);
-
-        v = new Variant();
-        addVariantAttribute(v, "Colour", "White");
-        variants.add(v);
-        return variants;
-    }
-
-    private static List<Variant> buildLongerVariantsList() {
-        List<Variant> variants = new ArrayList<>();
-        Variant v;
-
-        v = new Variant();
-        v.partNumber = 1;
-        addVariantAttribute(v, "Colour", "White");
-        addVariantAttribute(v, "service", "HomeDelivery");
-        variants.add(v);
-
-        v = new Variant();
-        v.partNumber = 2;
-        addVariantAttribute(v, "Colour", "White");
-        addVariantAttribute(v, "service", "Installation");
-        variants.add(v);
-
-        v = new Variant();
-        v.partNumber = 3;
-        addVariantAttribute(v, "Colour", "Black");
-        addVariantAttribute(v, "service", "HomeDelivery");
-        variants.add(v);
-
-        v = new Variant();
-        v.partNumber = 4;
-        addVariantAttribute(v, "Colour", "Black");
-        addVariantAttribute(v, "service", "Installation");
-        variants.add(v);
-
-        v = new Variant();
-        v.partNumber = 5;
-        addVariantAttribute(v, "Colour", "Red");
-        addVariantAttribute(v, "service", "HomeDelivery");
-        variants.add(v);
-
-        v = new Variant();
-        v.partNumber = 6;
-        addVariantAttribute(v, "Colour", "Red");
-        addVariantAttribute(v, "service", "Installation");
-        variants.add(v);
-        return variants;
-    }
-
-    private static List<Variant> buildExtraLongVariantsList() {
-        List<Variant> variants = new ArrayList<>();
-        Map<String, List<String>> variantsMap = new HashMap<>();
-        String colour = "Colour";
-        String size = "Size";
-        String delivery = "Delivery";
-        String pattern = "Pattern";
-        String quality = "Quality";
-        String type = "Type";
-        variantsMap.put(colour, Arrays.asList("Red", "Green", "Blue"));
-        variantsMap.put(size, Arrays.asList("XS", "S", "M", "L", "XL", "XXL", "XXXL"));
-        variantsMap.put(delivery, Arrays.asList("Standard", "Installation", "Fasttrack"));
-        variantsMap.put(pattern, Arrays.asList("WW", "XX", "OO", "NN"));
-        variantsMap.put(quality, Arrays.asList("Value", "Premium", "Best"));
-        variantsMap.put(type, Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I", "J"));
-        for (String colourVal : variantsMap.get(colour)) {
-            for (String sizeVal : variantsMap.get(size)) {
-                for (String deliveryVal : variantsMap.get(delivery)) {
-                    for (String patternVal : variantsMap.get(pattern)) {
-                        for (String qualityVal : variantsMap.get(quality)) {
-                            for (String typeVal : variantsMap.get(type)) {
-                                Variant variant = new Variant();
-                                addVariantAttribute(variant, colour, colourVal);
-                                addVariantAttribute(variant, size, sizeVal);
-                                addVariantAttribute(variant, delivery, deliveryVal);
-                                addVariantAttribute(variant, pattern, patternVal);
-                                addVariantAttribute(variant, quality, qualityVal);
-                                addVariantAttribute(variant, type, typeVal);
-                                variants.add(variant);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return variants;
-    }
-
-    private static void addVariantAttribute(Variant v, String type, String value) {
-        if (v.attributes == null) v.attributes = new ArrayList<>();
-        Variant.Attribute a = new Variant.Attribute();
-        a.type = type;
-        a.value = value;
-        v.attributes.add(a);
-    }
 }
