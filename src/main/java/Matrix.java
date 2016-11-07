@@ -1,10 +1,11 @@
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Matrix<T> {
+public class Matrix<T> implements Iterable<T> {
 
     private Map<String, Integer> variantTypes;
     private List<Map<String, Integer>> variantValues;
@@ -29,29 +30,27 @@ public class Matrix<T> {
             Map<String, Integer> variantValue = variantValues.get(i);
             dims[i] = variantValue.size();
         }
-        switch (size) {
-            case 1:
-                return new Object[dims[0]];
-            case 2:
-                return new Object[dims[0]][dims[1]];
-            case 3:
-                return new Object[dims[0]][dims[1]][dims[2]];
-            case 4:
-                return new Object[dims[0]][dims[1]][dims[2]][dims[3]];
-            case 5:
-                return new Object[dims[0]][dims[1]][dims[2]][dims[3]][dims[4]];
-            case 6:
-                return new Object[dims[0]][dims[1]][dims[2]][dims[3]][dims[4]][dims[5]];
-            default:
-                throw new IllegalStateException("Matrix must be of no more than 6 dimentions");
+        return initDimen(0);
+    }
+
+    private Object initDimen(int level) {
+        if (level == dimCount - 1) {
+            return new Object[dims[level]];
+        } else {
+            int dimSize = dims[level];
+            Object[] dimLevel = new Object[dimSize];
+            for (int i = 0, dimLength = dimLevel.length; i < dimLength; i++) {
+                dimLevel[i] = initDimen(level + 1);
+            }
+            return dimLevel;
         }
     }
 
-    public int[] dimentions() {
+    public int[] dimentionSizes() {
         return dims;
     }
 
-    public int dimentionsCount() {
+    public int dimentionCount() {
         return dimCount;
     }
 
@@ -63,31 +62,16 @@ public class Matrix<T> {
         return product;
     }
 
-    @Nullable
-    public T get(Map<String, String> coordinates) {
-        int[] indices = new int[dimCount];
-        for (String type : coordinates.keySet()) {
-            Integer typeIndex = variantTypes.get(type);
-            indices[typeIndex] = variantValues.get(typeIndex).get(coordinates.get(type));
-        }
-        Object tempHolder = data;
-        for (int i = 0, indicesLength = indices.length; i < indicesLength; i++) {
-            int index = indices[i];
-            if (i == indicesLength - 1) {
-                return (T) ((Object[]) tempHolder)[index];
-            } else {
-                tempHolder = ((Object[]) tempHolder)[index];
-            }
-        }
-        return null;
-    }
-
     public void insert(Map<String, String> coordinates, T value) {
         int[] indices = new int[dimCount];
         for (String type : coordinates.keySet()) {
             Integer typeIndex = variantTypes.get(type);
             indices[typeIndex] = variantValues.get(typeIndex).get(coordinates.get(type));
         }
+        insetrByIndices(value, indices);
+    }
+
+    private void insetrByIndices(T value, int[] indices) {
         Object tempHolder = data;
         for (int i = 0, indicesLength = indices.length; i < indicesLength; i++) {
             int index = indices[i];
@@ -99,7 +83,96 @@ public class Matrix<T> {
         }
     }
 
+    @Nullable
+    public T get(Map<String, String> coordinates) {
+        int[] indices = new int[dimCount];
+        for (String type : coordinates.keySet()) {
+            Integer typeIndex = variantTypes.get(type);
+            indices[typeIndex] = variantValues.get(typeIndex).get(coordinates.get(type));
+        }
+        return getByIndices(indices);
+    }
+
+    private T getByIndices(int[] indices) {
+        Object tempHolder = data;
+        for (int i = 0, indicesLength = indices.length; i < indicesLength; i++) {
+            int index = indices[i];
+            if (i == indicesLength - 1) {
+                //noinspection unchecked
+                return (T) ((Object[]) tempHolder)[index];
+            } else {
+                tempHolder = ((Object[]) tempHolder)[index];
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new MatrixIterator();
+    }
+
+    private class MatrixIterator implements Iterator<T> {
+
+        int[] indices = new int[dimCount];
+        T currItem;
+
+        @Override
+        public boolean hasNext() {
+            return iterate(true);
+        }
+
+        private boolean iterate(boolean justCheck) {
+            T item = getByIndices(indices);
+            while (item == null) {
+                if (!incrementIndices()) {
+                    return false;
+                }
+                item = getByIndices(indices);
+                currItem = item;
+            }
+            if (justCheck) {
+                return true;
+            } else {
+                return incrementIndices();
+            }
+        }
+
+        private boolean incrementIndices() {
+            return incrementLevel(0);
+        }
+
+        private boolean incrementLevel(int level) {
+            if (level < dimCount) {
+                if (indices[level] + 1 < dims[level]) {
+                    indices[level]++;
+                    return true;
+                } else {
+                    indices[level] = 0;
+                    return incrementLevel(level + 1);
+                }
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public T next() {
+            iterate(false);
+            return currItem;
+        }
+
+        @Override
+        public void remove() {
+            if (hasNext()) {
+                insetrByIndices(null, indices);
+                incrementIndices();
+            }
+        }
+    }
+
     public static void main(String[] args) {
 
     }
+
 }

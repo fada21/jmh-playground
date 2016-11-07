@@ -61,6 +61,15 @@ public class VariantsCruncher {
         System.out.println("Capacity: " + variantsCruncher.matrix.capacity());
         System.out.println(variantsCruncher);
 
+//        String colour = "Colour";
+//        String delivery = "service";
+//        Map<String, String> coordinates = new HashMap<>();
+//        coordinates.put(colour, "White");
+//        coordinates.put(delivery, "Installation");
+//        variantsCruncher.matrix.insert(coordinates, "Elem test");
+//        System.out.println(variantsCruncher.matrix.get(coordinates));
+
+
 
         String colour = "Colour";
         String size = "Size";
@@ -77,6 +86,20 @@ public class VariantsCruncher {
         coordinates.put(type, "B");
         variantsCruncher.matrix.insert(coordinates, "Elem test");
         System.out.println(variantsCruncher.matrix.get(coordinates));
+
+        coordinates = new HashMap<>();
+        coordinates.put(colour, "Red");
+        coordinates.put(size, "XL");
+        coordinates.put(delivery, "Installation");
+        coordinates.put(pattern, "NN");
+        coordinates.put(quality, "Value");
+        coordinates.put(type, "F");
+        variantsCruncher.matrix.insert(coordinates, "Second");
+
+        for (String s : variantsCruncher.matrix) {
+            System.out.println(s);
+        }
+
 
     }
 
