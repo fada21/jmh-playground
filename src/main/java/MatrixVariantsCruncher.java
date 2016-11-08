@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
 
@@ -33,7 +30,7 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
                 } else {
                     int currentIndex = variantTypes.size();
                     variantTypes.put(attribute.type(), currentIndex);
-                    Map<String, Integer> values = new HashMap<>();
+                    Map<String, Integer> values = new LinkedHashMap<>();
                     values.put(attribute.value(), 0);
                     variantValues.add(currentIndex, values);
                 }
@@ -69,7 +66,7 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
         return coordinates;
     }
 
-    public List<T> getDimensionSlice(Map<String, String> typeToValueMap, String type) {
+    public Map<String, T> getDimensionSlice(Map<String, String> typeToValueMap, String type) {
         return matrix.getDimensionSlice(typeToValueMap, type);
     }
 

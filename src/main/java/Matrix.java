@@ -1,11 +1,13 @@
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Matrix<T> implements Iterable<T> {
-
+    /**
+     * Dimention type with index of list of dimention values stored
+     */
     private Map<String, Integer> dimensionTypes;
+    /**
+     * Dimention values with index of list of dimention values stored
+     */
     private List<Map<String, Integer>> dimensionValues;
     private int dimCount;
     private int[] dims;
@@ -141,7 +143,7 @@ public class Matrix<T> implements Iterable<T> {
         return null;
     }
 
-    public List<T> getDimensionSlice(Map<String, String> coordinates, String dimenType) {
+    public Map<String, T> getDimensionSlice(Map<String, String> coordinates, String dimenType) {
         int sliceDimenTypeIndex = 0;
         int[] indices = new int[dimCount];
         for (Map.Entry<String, String> entry : coordinates.entrySet()) {
@@ -151,12 +153,12 @@ public class Matrix<T> implements Iterable<T> {
             if (typeIndex == null) return null;
             indices[typeIndex] = dimensionValues.get(typeIndex).get(entry.getValue());
         }
-
-        List<T> itemsDimenSlice = new ArrayList<>();
-        for (int i = 0, limit = dims[sliceDimenTypeIndex]; i < limit; i++) {
-            indices[sliceDimenTypeIndex] = i;
+        Map<String, T> itemsDimenSlice = new LinkedHashMap<>();
+        Map<String, Integer> valuesWithIndex = dimensionValues.get(dimensionTypes.get(dimenType));
+        for (Map.Entry<String, Integer> entry : valuesWithIndex.entrySet()) {
+            indices[sliceDimenTypeIndex] = entry.getValue();
             T item = getByIndices(indices);
-            itemsDimenSlice.add(item);
+            itemsDimenSlice.put(entry.getKey(), item);
         }
         return itemsDimenSlice;
     }

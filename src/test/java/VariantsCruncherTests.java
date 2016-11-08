@@ -4,40 +4,48 @@ import java.util.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.*;
 
 public class VariantsCruncherTests {
 
     MatrixVariantsCruncher.VariantAdapter<String, Variant> adapter = new MatrixVariantsCruncher.VariantAdapter<String, Variant>() {
-        @Override public MatrixVariantsCruncher.Variant convert(Variant rawVariant) {
+        @Override
+        public MatrixVariantsCruncher.Variant convert(Variant rawVariant) {
             return () -> rawVariant.attributes;
         }
 
-        @Override public String toItem(Variant rawVariant) {
+        @Override
+        public String toItem(Variant rawVariant) {
             return rawVariant.ref;
         }
     };
 
-    @Test public void initTest() {
+    @Test
+    public void initTest() {
         assertNotNull(new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter));
         assertNotNull(new MatrixVariantsCruncher<>(buildLongerVariantsList(), adapter));
         assertNotNull(new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter));
     }
 
-    @Test public void capacityTest() {
+    @Test
+    public void capacityTest() {
         assertThat(new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter).getMatrix().capacity(), equalTo(1));
         assertThat(new MatrixVariantsCruncher<>(buildLongerVariantsList(), adapter).getMatrix().capacity(), equalTo(6));
         assertThat(new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter).getMatrix().capacity(), equalTo(7560));
     }
 
-    @Test public void variantTypeCountTest() {
+    @Test
+    public void variantTypeCountTest() {
         assertThat(new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter).getMatrix().dimentionCount(), equalTo(2));
         assertThat(new MatrixVariantsCruncher<>(buildLongerVariantsList(), adapter).getMatrix().dimentionCount(), equalTo(2));
         assertThat(new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter).getMatrix().dimentionCount(), equalTo(6));
     }
 
-    @Test public void insertTest_small() {
+    @Test
+    public void insertTest_small() {
         MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(1));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(1));
@@ -57,7 +65,8 @@ public class VariantsCruncherTests {
         assertThat(variantsCruncher.getMatrix().fillRatio(), equalTo(1f));
     }
 
-    @Test public void insertTest_medium() {
+    @Test
+    public void insertTest_medium() {
         MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildLongerVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(6));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(6));
@@ -79,7 +88,8 @@ public class VariantsCruncherTests {
     }
 
 
-    @Test public void insertTest_large() {
+    @Test
+    public void insertTest_large() {
         MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
@@ -112,7 +122,8 @@ public class VariantsCruncherTests {
         }
     }
 
-    @Test public void fillTest_large() {
+    @Test
+    public void fillTest_large() {
         MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
@@ -139,7 +150,8 @@ public class VariantsCruncherTests {
         assertThat(variantsCruncher.getMatrix().size(), equalTo(7559));
     }
 
-    @Test public void sliceTest_large() {
+    @Test
+    public void sliceTest_large() {
         MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
@@ -164,36 +176,39 @@ public class VariantsCruncherTests {
         assertTrue(variantsCruncher.remove(coordinates));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(7559));
         assertNull(variantsCruncher.get(coordinates));
-        assertEquals(variantsCruncher.getDimensionSlice(coordinates, size).size(), 7);
-        assertThat(variantsCruncher.getDimensionSlice(coordinates, size), containsInAnyOrder(
-                "Green_XS_Installation_XX_Premium_B",
-                "Green_M_Installation_XX_Premium_B",
-                "Green_L_Installation_XX_Premium_B",
-                "Green_XL_Installation_XX_Premium_B",
-                "Green_XXL_Installation_XX_Premium_B",
-                "Green_XXXL_Installation_XX_Premium_B",
-                null));
-        assertThat(variantsCruncher.getDimensionSlice(coordinates, type), containsInAnyOrder(
-                "Green_S_Installation_XX_Premium_A",
-                "Green_S_Installation_XX_Premium_C",
-                "Green_S_Installation_XX_Premium_D",
-                "Green_S_Installation_XX_Premium_E",
-                "Green_S_Installation_XX_Premium_F",
-                "Green_S_Installation_XX_Premium_G",
-                "Green_S_Installation_XX_Premium_H",
-                "Green_S_Installation_XX_Premium_I",
-                "Green_S_Installation_XX_Premium_J",
-                null));
+
+        Map<String, String> dimensionSlice = variantsCruncher.getDimensionSlice(coordinates, size);
+        assertEquals(dimensionSlice.size(), 7);
+        assertThat(dimensionSlice, hasEntry("XS", "Green_XS_Installation_XX_Premium_B"));
+        assertThat(dimensionSlice, hasEntry("S", null));
+        assertThat(dimensionSlice, hasEntry("M", "Green_M_Installation_XX_Premium_B"));
+        assertThat(dimensionSlice, hasEntry("L", "Green_L_Installation_XX_Premium_B"));
+        assertThat(dimensionSlice, hasEntry("XL", "Green_XL_Installation_XX_Premium_B"));
+        assertThat(dimensionSlice, hasEntry("XXL", "Green_XXL_Installation_XX_Premium_B"));
+        assertThat(dimensionSlice, hasEntry("XXXL", "Green_XXXL_Installation_XX_Premium_B"));
+
+        dimensionSlice = variantsCruncher.getDimensionSlice(coordinates, type);
+        assertThat(dimensionSlice, hasEntry("A", "Green_S_Installation_XX_Premium_A"));
+        assertThat(dimensionSlice, hasEntry("B", null));
+        assertThat(dimensionSlice, hasEntry("C", "Green_S_Installation_XX_Premium_C"));
+        assertThat(dimensionSlice, hasEntry("D", "Green_S_Installation_XX_Premium_D"));
+        assertThat(dimensionSlice, hasEntry("E", "Green_S_Installation_XX_Premium_E"));
+        assertThat(dimensionSlice, hasEntry("F", "Green_S_Installation_XX_Premium_F"));
+        assertThat(dimensionSlice, hasEntry("G", "Green_S_Installation_XX_Premium_G"));
+        assertThat(dimensionSlice, hasEntry("H", "Green_S_Installation_XX_Premium_H"));
+        assertThat(dimensionSlice, hasEntry("I", "Green_S_Installation_XX_Premium_I"));
+        assertThat(dimensionSlice, hasEntry("J", "Green_S_Installation_XX_Premium_J"));
         coordinates.put(colour, "Red");
         coordinates.put(pattern, "OO");
         coordinates.put(type, "J");
-        assertThat(variantsCruncher.getDimensionSlice(coordinates, delivery), containsInAnyOrder(
-                "Red_S_Standard_OO_Premium_J",
-                "Red_S_Installation_OO_Premium_J",
-                "Red_S_Fasttrack_OO_Premium_J"));
+        dimensionSlice = variantsCruncher.getDimensionSlice(coordinates, delivery);
+        assertThat(dimensionSlice, hasEntry("Standard", "Red_S_Standard_OO_Premium_J"));
+        assertThat(dimensionSlice, hasEntry("Installation", "Red_S_Installation_OO_Premium_J"));
+        assertThat(dimensionSlice, hasEntry("Fasttrack", "Red_S_Fasttrack_OO_Premium_J"));
     }
 
-    @Test public void testThatCoordiantesMustBeWellFormed() {
+    @Test
+    public void testThatCoordiantesMustBeWellFormed() {
         MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
@@ -232,7 +247,8 @@ public class VariantsCruncherTests {
     }
 
 
-    @Test public void removeTest() {
+    @Test
+    public void removeTest() {
         MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(1));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(1));
@@ -260,7 +276,8 @@ public class VariantsCruncherTests {
         assertThat(variantsCruncher.getMatrix().fillRatio(), equalTo(0f));
     }
 
-    @Test public void testGetTypeToValueMap() {
+    @Test
+    public void testGetTypeToValueMap() {
         String colour = "Colour";
         String size = "Size";
         String delivery = "Delivery";
