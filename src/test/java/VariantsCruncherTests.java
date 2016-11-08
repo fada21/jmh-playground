@@ -322,6 +322,16 @@ public class VariantsCruncherTests {
         assertThat(variantsCruncher.getMatrix().size(), equalTo(1));
     }
 
+    @Test public void getDimentionSizeTest() {
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
+        assertEquals(3, variantsCruncher.getAvailableOptionsCount("Colour"));
+        assertEquals(7, variantsCruncher.getAvailableOptionsCount("Size"));
+        assertEquals(3, variantsCruncher.getAvailableOptionsCount("Delivery"));
+        assertEquals(4, variantsCruncher.getAvailableOptionsCount("Pattern"));
+        assertEquals(3, variantsCruncher.getAvailableOptionsCount("Quality"));
+        assertEquals(10, variantsCruncher.getAvailableOptionsCount("Type"));
+    }
+
     private static List<Variant> buildSimpleVariantsList() {
         List<Variant> variants = new ArrayList<>();
         Variant v;

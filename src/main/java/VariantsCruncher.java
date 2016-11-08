@@ -4,17 +4,22 @@ import java.util.Map;
 /**
  * Contract for variants cruncher
  *
- * @param <T> stored data getType
- * @param <V> getType of variant like data to process
+ * @param <T> stored data type
+ * @param <V> type of variant like data to process
  */
 public interface VariantsCruncher<T, V> {
 
+    /**
+     * Provides currently set variant combination for particular passed variant object
+     */
     Map<String, String> getTypeToValueMap(V variant);
+
+    int getAvailableOptionsCount(String type);
 
     /**
      * @param typeToValueMap current point of slicing
-     * @param type variant getValue to slice based on
-     * @return map of variant getValue to variant data
+     * @param type           variant value to slice based on
+     * @return map of variant value to variant data
      */
     Map<String, T> getDimensionSlice(Map<String, String> typeToValueMap, String type);
 

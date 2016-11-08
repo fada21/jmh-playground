@@ -66,6 +66,11 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
         return coordinates;
     }
 
+    @Override public int getAvailableOptionsCount(String type) {
+        return matrix.getDimentionSize(type);
+    }
+
+
     public Map<String, T> getDimensionSlice(Map<String, String> typeToValueMap, String type) {
         return matrix.getDimensionSlice(typeToValueMap, type);
     }

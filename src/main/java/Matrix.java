@@ -54,6 +54,12 @@ public class Matrix<T> implements Iterable<T> {
         }
     }
 
+    public int getDimentionSize(String type) {
+        Integer index = dimensionTypes.get(type);
+        int i = index == null ? 0 : index;
+        return dimensionValues.get(i).size();
+    }
+
     public int dimentionCount() {
         return dimCount;
     }
