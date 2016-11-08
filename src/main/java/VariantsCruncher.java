@@ -11,7 +11,12 @@ public interface VariantsCruncher<T, V> {
 
     Map<String, String> getTypeToValueMap(V variant);
 
-    List<T> getDimensionSlice(Map<String, String> typeToValueMap, String type);
+    /**
+     * @param typeToValueMap current point of slicing
+     * @param type variant value to slice based on
+     * @return map of variant value to variant data
+     */
+    Map<String, T> getDimensionSlice(Map<String, String> typeToValueMap, String type);
 
     interface VariantAdapter<T, V> {
         VariantsCruncher.Variant convert(V rawVariant);
