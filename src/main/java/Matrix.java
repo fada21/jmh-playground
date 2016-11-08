@@ -1,6 +1,3 @@
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,8 +12,8 @@ public class Matrix<T> implements Iterable<T> {
     private final Object data;
     private int size;
 
-    Matrix(@NotNull final Map<String, Integer> dimensionTypes,
-           @NotNull final List<Map<String, Integer>> dimensionValues,
+    Matrix(final Map<String, Integer> dimensionTypes,
+           final List<Map<String, Integer>> dimensionValues,
            Map<Map<String, String>, T> coordinationsWithItmes) {
         if (dimensionTypes.size() == 0 || dimensionValues.size() == 0) {
             throw new IllegalArgumentException("Dimension size must be positive");
@@ -72,7 +69,7 @@ public class Matrix<T> implements Iterable<T> {
         return (float) size / capacity();
     }
 
-    boolean insert(Map<String, String> coordinates, @NotNull T value) {
+    boolean insert(Map<String, String> coordinates, T value) {
         if (coordinates.size() != dimCount) return false;
         int[] indices = new int[dimCount];
         for (Map.Entry<String, String> entry : coordinates.entrySet()) {
@@ -94,7 +91,7 @@ public class Matrix<T> implements Iterable<T> {
         return insertByIndices(null, indices);
     }
 
-    private boolean insertByIndices(@Nullable T value, int[] indices) {
+    private boolean insertByIndices(T value, int[] indices) {
         Object tempHolder = data;
         for (int i = 0, indicesLength = indices.length; i < indicesLength; i++) {
             int index = indices[i];
@@ -119,7 +116,6 @@ public class Matrix<T> implements Iterable<T> {
         throw new IllegalStateException("Insert method should never reach that state");
     }
 
-    @Nullable
     public T get(Map<String, String> coordinates) {
         if (coordinates.size() != dimCount) return null;
         int[] indices = new int[dimCount];
@@ -145,7 +141,7 @@ public class Matrix<T> implements Iterable<T> {
         return null;
     }
 
-    public List<T> getDimensionSlice(@NotNull Map<String, String> coordinates, String dimenType) {
+    public List<T> getDimensionSlice(Map<String, String> coordinates, String dimenType) {
         int sliceDimenTypeIndex = 0;
         int[] indices = new int[dimCount];
         for (Map.Entry<String, String> entry : coordinates.entrySet()) {

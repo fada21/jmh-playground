@@ -1,5 +1,3 @@
-import com.sun.istack.internal.NotNull;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +10,12 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
     private List<Map<String, Integer>> variantValues = new ArrayList<>();
     private Matrix<T> matrix;
 
-    public MatrixVariantsCruncher(@NotNull final List<V> variants, VariantAdapter<T, V> adapter) {
+    public MatrixVariantsCruncher(final List<V> variants, VariantAdapter<T, V> adapter) {
         this.adapter = adapter;
         buildVariantsData(variants);
     }
 
-    private void buildVariantsData(@NotNull final List<V> variants) {
+    private void buildVariantsData(final List<V> variants) {
         variantTypes = new HashMap<>();
         Map<Map<String, String>, T> coordinationsWithItmes = new HashMap<>();
         Map<String, String> coordinates;
@@ -45,23 +43,24 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
         matrix = new Matrix<>(variantTypes, variantValues, coordinationsWithItmes);
     }
 
-    public boolean insert(@NotNull Map<String, String> coordinates, @NotNull T value) {
+    public boolean insert(Map<String, String> coordinates, T value) {
         return matrix.insert(coordinates, value);
     }
 
-    public T get(@NotNull Map<String, String> coordinates) {
+    public T get(Map<String, String> coordinates) {
         return matrix.get(coordinates);
     }
 
-    public boolean remove(@NotNull Map<String, String> coordinates) {
+    public boolean remove(Map<String, String> coordinates) {
         return matrix.remove(coordinates);
     }
 
-    @NotNull public Matrix<T> getMatrix() {
+    public Matrix<T> getMatrix() {
         return matrix;
     }
 
-    @Override public Map<String, String> getTypeToValueMap(@NotNull V rawVariant) {
+    @Override
+    public Map<String, String> getTypeToValueMap(V rawVariant) {
         Variant variant = adapter.convert(rawVariant);
         Map<String, String> coordinates = new HashMap<>();
         for (Attribute attribute : variant.attributes()) {
@@ -70,7 +69,7 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
         return coordinates;
     }
 
-    @NotNull public List<T> getDimensionSlice(@NotNull Map<String, String> typeToValueMap, String type) {
+    public List<T> getDimensionSlice(Map<String, String> typeToValueMap, String type) {
         return matrix.getDimensionSlice(typeToValueMap, type);
     }
 

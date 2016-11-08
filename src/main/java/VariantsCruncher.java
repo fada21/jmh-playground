@@ -1,20 +1,21 @@
-import com.sun.istack.internal.NotNull;
-
 import java.util.List;
 import java.util.Map;
 
 /**
  * Contract for variants cruncher
+ *
  * @param <T> stored data type
+ * @param <V> type of variant like data to process
  */
 public interface VariantsCruncher<T, V> {
 
-    @NotNull Map<String, String> getTypeToValueMap(@NotNull V variant);
+    Map<String, String> getTypeToValueMap(V variant);
 
-    @NotNull List<T> getDimensionSlice(@NotNull Map<String, String> typeToValueMap, String type);
+    List<T> getDimensionSlice(Map<String, String> typeToValueMap, String type);
 
     interface VariantAdapter<T, V> {
-        MatrixVariantsCruncher.Variant convert(V rawVariant);
+        VariantsCruncher.Variant convert(V rawVariant);
+
         T toItem(V rawVariant);
     }
 
@@ -24,6 +25,7 @@ public interface VariantsCruncher<T, V> {
 
     interface Attribute {
         String type();
+
         String value();
     }
 }
