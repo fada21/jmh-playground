@@ -8,28 +8,32 @@ import java.util.Map;
 
 public class Matrix<T> implements Iterable<T> {
 
-    private Map<String, Integer> variantTypes;
-    private List<Map<String, Integer>> variantValues;
+    private Map<String, Integer> dimensionTypes;
+    private List<Map<String, Integer>> dimensionValues;
     private int dimCount;
     private int[] dims;
     private final Object data;
     private int size;
 
-    Matrix(@NotNull final Map<String, Integer> variantTypes,
-           @NotNull final List<Map<String, Integer>> variantValues) {
-        if (variantTypes.size() == 0 || variantValues.size() == 0) {
+    Matrix(@NotNull final Map<String, Integer> dimensionTypes,
+           @NotNull final List<Map<String, Integer>> dimensionValues,
+           Map<Map<String, String>, T> coordinationsWithItmes) {
+        if (dimensionTypes.size() == 0 || dimensionValues.size() == 0) {
             throw new IllegalArgumentException("Dimension size must be positive");
         }
-        this.variantTypes = variantTypes;
-        this.variantValues = variantValues;
+        this.dimensionTypes = dimensionTypes;
+        this.dimensionValues = dimensionValues;
         data = init();
+        for (Map.Entry<Map<String, String>, T> entry : coordinationsWithItmes.entrySet()) {
+            insert(entry.getKey(), entry.getValue());
+        }
     }
 
     private Object init() {
-        int size = dimCount = variantTypes.size();
+        int size = dimCount = dimensionTypes.size();
         dims = new int[size];
-        for (int i = 0, variantValuesSize = variantValues.size(); i < variantValuesSize; i++) {
-            Map<String, Integer> variantValue = variantValues.get(i);
+        for (int i = 0, variantValuesSize = dimensionValues.size(); i < variantValuesSize; i++) {
+            Map<String, Integer> variantValue = dimensionValues.get(i);
             dims[i] = variantValue.size();
         }
         return initDimen(0);
@@ -72,9 +76,9 @@ public class Matrix<T> implements Iterable<T> {
         if (coordinates.size() != dimCount) return false;
         int[] indices = new int[dimCount];
         for (Map.Entry<String, String> entry : coordinates.entrySet()) {
-            Integer typeIndex = variantTypes.get(entry.getKey());
+            Integer typeIndex = dimensionTypes.get(entry.getKey());
             if (typeIndex == null) return false;
-            indices[typeIndex] = variantValues.get(typeIndex).get(entry.getValue());
+            indices[typeIndex] = dimensionValues.get(typeIndex).get(entry.getValue());
         }
         return insertByIndices(value, indices);
     }
@@ -83,9 +87,9 @@ public class Matrix<T> implements Iterable<T> {
         if (coordinates.size() != dimCount) return false;
         int[] indices = new int[dimCount];
         for (Map.Entry<String, String> entry : coordinates.entrySet()) {
-            Integer typeIndex = variantTypes.get(entry.getKey());
+            Integer typeIndex = dimensionTypes.get(entry.getKey());
             if (typeIndex == null) return false;
-            indices[typeIndex] = variantValues.get(typeIndex).get(entry.getValue());
+            indices[typeIndex] = dimensionValues.get(typeIndex).get(entry.getValue());
         }
         return insertByIndices(null, indices);
     }
@@ -120,9 +124,9 @@ public class Matrix<T> implements Iterable<T> {
         if (coordinates.size() != dimCount) return null;
         int[] indices = new int[dimCount];
         for (Map.Entry<String, String> entry : coordinates.entrySet()) {
-            Integer typeIndex = variantTypes.get(entry.getKey());
+            Integer typeIndex = dimensionTypes.get(entry.getKey());
             if (typeIndex == null) return null;
-            indices[typeIndex] = variantValues.get(typeIndex).get(entry.getValue());
+            indices[typeIndex] = dimensionValues.get(typeIndex).get(entry.getValue());
         }
         return getByIndices(indices);
     }
@@ -146,10 +150,10 @@ public class Matrix<T> implements Iterable<T> {
         int[] indices = new int[dimCount];
         for (Map.Entry<String, String> entry : coordinates.entrySet()) {
             String type = entry.getKey();
-            Integer typeIndex = variantTypes.get(type);
+            Integer typeIndex = dimensionTypes.get(type);
             if (type.equals(dimenType)) sliceDimenTypeIndex = typeIndex;
             if (typeIndex == null) return null;
-            indices[typeIndex] = variantValues.get(typeIndex).get(entry.getValue());
+            indices[typeIndex] = dimensionValues.get(typeIndex).get(entry.getValue());
         }
 
         List<T> itemsDimenSlice = new ArrayList<>();

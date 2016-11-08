@@ -9,27 +9,39 @@ import static org.junit.Assert.*;
 
 public class VariantsCruncherTests {
 
+    MatrixVariantsCruncher.VariantAdapter<String, Variant> adapter = new MatrixVariantsCruncher.VariantAdapter<String, Variant>() {
+        @Override public MatrixVariantsCruncher.Variant convert(Variant rawVariant) {
+            return () -> rawVariant.attributes;
+        }
+
+        @Override public String toItem(Variant rawVariant) {
+            return rawVariant.ref;
+        }
+    };
+
     @Test public void initTest() {
-        assertNotNull(new VariantsCruncher(buildSimpleVariantsList()));
-        assertNotNull(new VariantsCruncher(buildLongerVariantsList()));
-        assertNotNull(new VariantsCruncher(buildExtraLongVariantsList()));
+        assertNotNull(new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter));
+        assertNotNull(new MatrixVariantsCruncher<>(buildLongerVariantsList(), adapter));
+        assertNotNull(new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter));
     }
 
     @Test public void capacityTest() {
-        assertThat(new VariantsCruncher(buildSimpleVariantsList()).getMatrix().capacity(), equalTo(1));
-        assertThat(new VariantsCruncher(buildLongerVariantsList()).getMatrix().capacity(), equalTo(6));
-        assertThat(new VariantsCruncher(buildExtraLongVariantsList()).getMatrix().capacity(), equalTo(7560));
+        assertThat(new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter).getMatrix().capacity(), equalTo(1));
+        assertThat(new MatrixVariantsCruncher<>(buildLongerVariantsList(), adapter).getMatrix().capacity(), equalTo(6));
+        assertThat(new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter).getMatrix().capacity(), equalTo(7560));
     }
 
     @Test public void variantTypeCountTest() {
-        assertThat(new VariantsCruncher(buildSimpleVariantsList()).getMatrix().dimentionCount(), equalTo(2));
-        assertThat(new VariantsCruncher(buildLongerVariantsList()).getMatrix().dimentionCount(), equalTo(2));
-        assertThat(new VariantsCruncher(buildExtraLongVariantsList()).getMatrix().dimentionCount(), equalTo(6));
+        assertThat(new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter).getMatrix().dimentionCount(), equalTo(2));
+        assertThat(new MatrixVariantsCruncher<>(buildLongerVariantsList(), adapter).getMatrix().dimentionCount(), equalTo(2));
+        assertThat(new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter).getMatrix().dimentionCount(), equalTo(6));
     }
 
     @Test public void insertTest_small() {
-        VariantsCruncher<String> variantsCruncher = new VariantsCruncher<>(buildSimpleVariantsList());
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(1));
+        assertThat(variantsCruncher.getMatrix().size(), equalTo(1));
+        clearMatrix(variantsCruncher);
         assertThat(variantsCruncher.getMatrix().size(), equalTo(0));
 
         String colour = "Colour";
@@ -46,9 +58,12 @@ public class VariantsCruncherTests {
     }
 
     @Test public void insertTest_medium() {
-        VariantsCruncher<String> variantsCruncher = new VariantsCruncher<>(buildLongerVariantsList());
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildLongerVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(6));
+        assertThat(variantsCruncher.getMatrix().size(), equalTo(6));
+        clearMatrix(variantsCruncher);
         assertThat(variantsCruncher.getMatrix().size(), equalTo(0));
+
 
         String colour = "Colour";
         String delivery = "service";
@@ -65,8 +80,10 @@ public class VariantsCruncherTests {
 
 
     @Test public void insertTest_large() {
-        VariantsCruncher<String> variantsCruncher = new VariantsCruncher<>(buildExtraLongVariantsList());
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
+        assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
+        clearMatrix(variantsCruncher);
         assertThat(variantsCruncher.getMatrix().size(), equalTo(0));
 
         String colour = "Colour";
@@ -88,14 +105,17 @@ public class VariantsCruncherTests {
         assertThat(variantsCruncher.getMatrix().iterator().next(), equalTo("Expected"));
     }
 
-    @Test public void fillTest_large() {
-        VariantsCruncher<String> variantsCruncher = new VariantsCruncher<>(buildExtraLongVariantsList());
-        assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
-        assertThat(variantsCruncher.getMatrix().size(), equalTo(0));
-
-        for (Map.Entry<Map<String, String>, String> entry : fillCoordinatesWithItems().entrySet()) {
-            variantsCruncher.insert(entry.getKey(), entry.getValue());
+    private void clearMatrix(MatrixVariantsCruncher<String, Variant> variantsCruncher) {
+        Iterator<String> iterator = variantsCruncher.getMatrix().iterator();
+        while (iterator.hasNext()) {
+            iterator.remove();
         }
+    }
+
+    @Test public void fillTest_large() {
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
+        assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
+        assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
 
         String colour = "Colour";
         String size = "Size";
@@ -120,13 +140,9 @@ public class VariantsCruncherTests {
     }
 
     @Test public void sliceTest_large() {
-        VariantsCruncher<String> variantsCruncher = new VariantsCruncher<>(buildExtraLongVariantsList());
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
-        assertThat(variantsCruncher.getMatrix().size(), equalTo(0));
-
-        for (Map.Entry<Map<String, String>, String> entry : fillCoordinatesWithItems().entrySet()) {
-            variantsCruncher.insert(entry.getKey(), entry.getValue());
-        }
+        assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
 
         String colour = "Colour";
         String size = "Size";
@@ -142,7 +158,7 @@ public class VariantsCruncherTests {
         coordinates.put(quality, "Premium");
         coordinates.put(type, "B");
 
-        assertEquals(variantsCruncher.get(coordinates), "Green_S_Installation_XX_Premium_B");
+        assertEquals("Green_S_Installation_XX_Premium_B", variantsCruncher.get(coordinates));
         assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
         assertThat(variantsCruncher.getMatrix().fillRatio(), equalTo(1f));
         assertTrue(variantsCruncher.remove(coordinates));
@@ -178,13 +194,10 @@ public class VariantsCruncherTests {
     }
 
     @Test public void testThatCoordiantesMustBeWellFormed() {
-        VariantsCruncher<String> variantsCruncher = new VariantsCruncher<>(buildExtraLongVariantsList());
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
-        assertThat(variantsCruncher.getMatrix().size(), equalTo(0));
+        assertThat(variantsCruncher.getMatrix().size(), equalTo(7560));
 
-        for (Map.Entry<Map<String, String>, String> entry : fillCoordinatesWithItems().entrySet()) {
-            variantsCruncher.insert(entry.getKey(), entry.getValue());
-        }
 
         String colour = "Colour";
         String size = "Size";
@@ -220,9 +233,12 @@ public class VariantsCruncherTests {
 
 
     @Test public void removeTest() {
-        VariantsCruncher<String> variantsCruncher = new VariantsCruncher<>(buildSimpleVariantsList());
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildSimpleVariantsList(), adapter);
         assertThat(variantsCruncher.getMatrix().capacity(), equalTo(1));
+        assertThat(variantsCruncher.getMatrix().size(), equalTo(1));
+        clearMatrix(variantsCruncher);
         assertThat(variantsCruncher.getMatrix().size(), equalTo(0));
+
 
         String colour = "Colour";
         String delivery = "service";
@@ -244,88 +260,70 @@ public class VariantsCruncherTests {
         assertThat(variantsCruncher.getMatrix().fillRatio(), equalTo(0f));
     }
 
+    private static List<Variant> buildSimpleVariantsList() {
+        List<Variant> variants = new ArrayList<>();
+        Variant v;
 
-    @Test public void insertTest2() {
-        VariantsCruncher<String> variantsCruncher = new VariantsCruncher<>(buildSimpleVariantsList());
-        assertThat(variantsCruncher.getMatrix().capacity(), equalTo(1));
-        assertThat(variantsCruncher.getMatrix().size(), equalTo(0));
-
-        String colour = "Colour";
-        String delivery = "service";
-        Map<String, String> coordinates = new HashMap<>();
-        coordinates.put(colour, "White");
-        coordinates.put(delivery, "HomeDelivery");
-        variantsCruncher.insert(coordinates, "Expected");
-
-        assertThat(variantsCruncher.getMatrix().size(), equalTo(1));
-        assertThat(variantsCruncher.getMatrix().iterator().next(), equalTo("Expected"));
-        assertThat(variantsCruncher.getMatrix().fillRatio(), equalTo(1f));
-    }
-
-    private static List<VariantsCruncher.Variant> buildSimpleVariantsList() {
-        List<VariantsCruncher.Variant> variants = new ArrayList<>();
-        VariantsCruncher.Variant v;
-
-        v = new VariantsCruncher.Variant();
-        v.partNumber = 1;
+        v = new Variant();
         addVariantAttribute(v, "Colour", "White");
         addVariantAttribute(v, "service", "HomeDelivery");
+        v.ref = "White_HomeDelivery";
         variants.add(v);
 
-        v = new VariantsCruncher.Variant();
+        v = new Variant();
         addVariantAttribute(v, "Colour", "White");
         variants.add(v);
 
-        v = new VariantsCruncher.Variant();
+        v = new Variant();
         addVariantAttribute(v, "Colour", "White");
         variants.add(v);
         return variants;
     }
 
-    private static List<VariantsCruncher.Variant> buildLongerVariantsList() {
-        List<VariantsCruncher.Variant> variants = new ArrayList<>();
-        VariantsCruncher.Variant v;
+    private static List<Variant> buildLongerVariantsList() {
+        List<Variant> variants = new ArrayList<>();
+        Variant v;
 
-        v = new VariantsCruncher.Variant();
-        v.partNumber = 1;
+        v = new Variant();
         addVariantAttribute(v, "Colour", "White");
         addVariantAttribute(v, "service", "HomeDelivery");
+        v.ref = "White_HomeDelivery";
         variants.add(v);
 
-        v = new VariantsCruncher.Variant();
-        v.partNumber = 2;
+        v = new Variant();
         addVariantAttribute(v, "Colour", "White");
         addVariantAttribute(v, "service", "Installation");
+        v.ref = "White_Installation";
         variants.add(v);
 
-        v = new VariantsCruncher.Variant();
-        v.partNumber = 3;
+        v = new Variant();
         addVariantAttribute(v, "Colour", "Black");
         addVariantAttribute(v, "service", "HomeDelivery");
+        v.ref = "Black_HomeDelivery";
         variants.add(v);
 
-        v = new VariantsCruncher.Variant();
-        v.partNumber = 4;
+        v = new Variant();
         addVariantAttribute(v, "Colour", "Black");
         addVariantAttribute(v, "service", "Installation");
+        v.ref = "Black_Installation";
         variants.add(v);
 
-        v = new VariantsCruncher.Variant();
-        v.partNumber = 5;
+        v = new Variant();
         addVariantAttribute(v, "Colour", "Red");
         addVariantAttribute(v, "service", "HomeDelivery");
+        v.ref = "Red_HomeDelivery";
         variants.add(v);
 
-        v = new VariantsCruncher.Variant();
-        v.partNumber = 6;
+        v = new Variant();
         addVariantAttribute(v, "Colour", "Red");
         addVariantAttribute(v, "service", "Installation");
+        v.ref = "Red_Installation";
         variants.add(v);
         return variants;
     }
 
-    private static List<VariantsCruncher.Variant> buildExtraLongVariantsList() {
-        List<VariantsCruncher.Variant> variants = new ArrayList<>();
+    private static List<Variant> buildExtraLongVariantsList() {
+        List<Variant> variants = new ArrayList<>();
         Map<String, List<String>> variantsMap = new HashMap<>();
         String colour = "Colour";
         String size = "Size";
@@ -345,13 +343,21 @@ public class VariantsCruncherTests {
                     for (String patternVal : variantsMap.get(pattern)) {
                         for (String qualityVal : variantsMap.get(quality)) {
                             for (String typeVal : variantsMap.get(type)) {
-                                VariantsCruncher.Variant variant = new VariantsCruncher.Variant();
+                                Variant variant = new Variant();
                                 addVariantAttribute(variant, colour, colourVal);
                                 addVariantAttribute(variant, size, sizeVal);
                                 addVariantAttribute(variant, delivery, deliveryVal);
                                 addVariantAttribute(variant, pattern, patternVal);
                                 addVariantAttribute(variant, quality, qualityVal);
                                 addVariantAttribute(variant, type, typeVal);
+                                StringBuilder sb = new StringBuilder();
+                                sb.append(colourVal).append("_");
+                                sb.append(sizeVal).append("_");
+                                sb.append(deliveryVal).append("_");
+                                sb.append(patternVal).append("_");
+                                sb.append(qualityVal).append("_");
+                                sb.append(typeVal);
+                                variant.ref = sb.toString();
                                 variants.add(variant);
                             }
                         }
@@ -362,55 +368,9 @@ public class VariantsCruncherTests {
         return variants;
     }
 
-    private static Map<Map<String, String>, String> fillCoordinatesWithItems() {
-        Map<Map<String, String>, String> coordinationsWithItmes = new HashMap<>();
-        List<VariantsCruncher.Variant> variants = new ArrayList<>();
-        Map<String, List<String>> variantsMap = new HashMap<>();
-        String colour = "Colour";
-        String size = "Size";
-        String delivery = "Delivery";
-        String pattern = "Pattern";
-        String quality = "Quality";
-        String type = "Type";
-        variantsMap.put(colour, Arrays.asList("Red", "Green", "Blue"));
-        variantsMap.put(size, Arrays.asList("XS", "S", "M", "L", "XL", "XXL", "XXXL"));
-        variantsMap.put(delivery, Arrays.asList("Standard", "Installation", "Fasttrack"));
-        variantsMap.put(pattern, Arrays.asList("WW", "XX", "OO", "NN"));
-        variantsMap.put(quality, Arrays.asList("Value", "Premium", "Best"));
-        variantsMap.put(type, Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I", "J"));
-        for (String colourVal : variantsMap.get(colour)) {
-            for (String sizeVal : variantsMap.get(size)) {
-                for (String deliveryVal : variantsMap.get(delivery)) {
-                    for (String patternVal : variantsMap.get(pattern)) {
-                        for (String qualityVal : variantsMap.get(quality)) {
-                            for (String typeVal : variantsMap.get(type)) {
-                                Map<String, String> coords = new HashMap<>(6);
-                                coords.put(colour, colourVal);
-                                coords.put(size, sizeVal);
-                                coords.put(delivery, deliveryVal);
-                                coords.put(pattern, patternVal);
-                                coords.put(quality, qualityVal);
-                                coords.put(type, typeVal);
-                                StringBuilder sb = new StringBuilder();
-                                sb.append(colourVal).append("_");
-                                sb.append(sizeVal).append("_");
-                                sb.append(deliveryVal).append("_");
-                                sb.append(patternVal).append("_");
-                                sb.append(qualityVal).append("_");
-                                sb.append(typeVal);
-                                coordinationsWithItmes.put(coords, sb.toString());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return coordinationsWithItmes;
-    }
-
-    private static void addVariantAttribute(VariantsCruncher.Variant v, String type, String value) {
+    private static void addVariantAttribute(Variant v, String type, String value) {
         if (v.attributes == null) v.attributes = new ArrayList<>();
-        VariantsCruncher.Variant.Attribute a = new VariantsCruncher.Variant.Attribute();
+        Variant.Attribute a = new Variant.Attribute();
         a.type = type;
         a.value = value;
         v.attributes.add(a);
