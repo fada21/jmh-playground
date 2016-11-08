@@ -4,8 +4,8 @@ import java.util.Map;
 /**
  * Contract for variants cruncher
  *
- * @param <T> stored data type
- * @param <V> type of variant like data to process
+ * @param <T> stored data getType
+ * @param <V> getType of variant like data to process
  */
 public interface VariantsCruncher<T, V> {
 
@@ -13,8 +13,8 @@ public interface VariantsCruncher<T, V> {
 
     /**
      * @param typeToValueMap current point of slicing
-     * @param type variant value to slice based on
-     * @return map of variant value to variant data
+     * @param type variant getValue to slice based on
+     * @return map of variant getValue to variant data
      */
     Map<String, T> getDimensionSlice(Map<String, String> typeToValueMap, String type);
 
@@ -25,12 +25,12 @@ public interface VariantsCruncher<T, V> {
     }
 
     interface Variant {
-        List<? extends MatrixVariantsCruncher.Attribute> attributes();
+        List<? extends VariantsCruncher.Attribute> attributes();
     }
 
     interface Attribute {
-        String type();
+        String getType();
 
-        String value();
+        String getValue();
     }
 }

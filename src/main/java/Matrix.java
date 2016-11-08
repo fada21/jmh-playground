@@ -1,12 +1,15 @@
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Matrix<T> implements Iterable<T> {
     /**
-     * Dimention type with index of list of dimention values stored
+     * Dimension getType with index of list of dimention values stored
      */
     private Map<String, Integer> dimensionTypes;
     /**
-     * Dimention values with index of list of dimention values stored
+     * Dimension values with index of list of dimention values stored
      */
     private List<Map<String, Integer>> dimensionValues;
     private int dimCount;

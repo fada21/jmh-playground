@@ -20,18 +20,18 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
             Variant variant = adapter.convert(rawVariant);
             coordinates = new HashMap<>();
             for (Attribute attribute : variant.attributes()) {
-                coordinates.put(attribute.type(), attribute.value());
-                if (variantTypes.containsKey(attribute.type())) {
-                    Integer typeIndex = variantTypes.get(attribute.type());
+                coordinates.put(attribute.getType(), attribute.getValue());
+                if (variantTypes.containsKey(attribute.getType())) {
+                    Integer typeIndex = variantTypes.get(attribute.getType());
                     Map<String, Integer> variantValuesWithIndex = variantValues.get(typeIndex);
-                    if (!variantValuesWithIndex.containsKey(attribute.value())) {
-                        variantValuesWithIndex.put(attribute.value(), variantValuesWithIndex.size());
+                    if (!variantValuesWithIndex.containsKey(attribute.getValue())) {
+                        variantValuesWithIndex.put(attribute.getValue(), variantValuesWithIndex.size());
                     }
                 } else {
                     int currentIndex = variantTypes.size();
-                    variantTypes.put(attribute.type(), currentIndex);
+                    variantTypes.put(attribute.getType(), currentIndex);
                     Map<String, Integer> values = new LinkedHashMap<>();
-                    values.put(attribute.value(), 0);
+                    values.put(attribute.getValue(), 0);
                     variantValues.add(currentIndex, values);
                 }
             }
@@ -61,7 +61,7 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
         Variant variant = adapter.convert(rawVariant);
         Map<String, String> coordinates = new HashMap<>();
         for (Attribute attribute : variant.attributes()) {
-            coordinates.put(attribute.type(), attribute.value());
+            coordinates.put(attribute.getType(), attribute.getValue());
         }
         return coordinates;
     }

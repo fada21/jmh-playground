@@ -4,15 +4,15 @@ public class Variant {
     String ref;
     List<Attribute> attributes;
 
-    public static class Attribute implements MatrixVariantsCruncher.Attribute {
+    public static class Attribute implements VariantsCruncher.Attribute {
         String type;
         String value;
 
-        @Override public String type() {
+        @Override public String getType() {
             return type;
         }
 
-        @Override public String value() {
+        @Override public String getValue() {
             return value;
         }
     }
