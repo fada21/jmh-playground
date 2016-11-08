@@ -9,9 +9,9 @@ import static org.junit.Assert.*;
 
 public class VariantsCruncherTests {
 
-    MatrixVariantsCruncher.VariantAdapter<String, Variant> adapter = new MatrixVariantsCruncher.VariantAdapter<String, Variant>() {
+    VariantsCruncher.VariantAdapter<String, Variant> adapter = new VariantsCruncher.VariantAdapter<String, Variant>() {
         @Override
-        public MatrixVariantsCruncher.Variant convert(Variant rawVariant) {
+        public VariantsCruncher.Variant convert(Variant rawVariant) {
             return () -> rawVariant.attributes;
         }
 
