@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T> {
+public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T, V> {
 
     private final VariantAdapter<T, V> adapter;
     private Map<String, Integer> variantTypes;
@@ -59,6 +59,15 @@ public class MatrixVariantsCruncher<T, V> implements VariantsCruncher<T> {
 
     @NotNull public Matrix<T> getMatrix() {
         return matrix;
+    }
+
+    @Override public Map<String, String> getTypeToValueMap(@NotNull V rawVariant) {
+        Variant variant = adapter.convert(rawVariant);
+        Map<String, String> coordinates = new HashMap<>();
+        for (Attribute attribute : variant.attributes()) {
+            coordinates.put(attribute.type(), attribute.value());
+        }
+        return coordinates;
     }
 
     @NotNull public List<T> getDimensionSlice(@NotNull Map<String, String> typeToValueMap, String type) {

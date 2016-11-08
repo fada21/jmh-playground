@@ -260,6 +260,53 @@ public class VariantsCruncherTests {
         assertThat(variantsCruncher.getMatrix().fillRatio(), equalTo(0f));
     }
 
+    @Test public void testGetTypeToValueMap() {
+        String colour = "Colour";
+        String size = "Size";
+        String delivery = "Delivery";
+        String pattern = "Pattern";
+        String quality = "Quality";
+        String type = "Type";
+        Map<String, String> coordinates = new HashMap<>();
+        String colourVal = "Green";
+        coordinates.put(colour, colourVal);
+        String sizeVal = "S";
+        coordinates.put(size, sizeVal);
+        String deliveryVal = "Installation";
+        coordinates.put(delivery, deliveryVal);
+        String patternVal = "XX";
+        coordinates.put(pattern, patternVal);
+        String qualityVal = "Premium";
+        coordinates.put(quality, qualityVal);
+        String typeVal = "B";
+        coordinates.put(type, typeVal);
+
+        Variant variant = new Variant();
+        addVariantAttribute(variant, colour, colourVal);
+        addVariantAttribute(variant, size, sizeVal);
+        addVariantAttribute(variant, delivery, deliveryVal);
+        addVariantAttribute(variant, pattern, patternVal);
+        addVariantAttribute(variant, quality, qualityVal);
+        addVariantAttribute(variant, type, typeVal);
+        StringBuilder sb = new StringBuilder();
+        sb.append(colourVal).append("_");
+        sb.append(sizeVal).append("_");
+        sb.append(deliveryVal).append("_");
+        sb.append(patternVal).append("_");
+        sb.append(qualityVal).append("_");
+        sb.append(typeVal);
+        variant.ref = sb.toString();
+
+        MatrixVariantsCruncher<String, Variant> variantsCruncher = new MatrixVariantsCruncher<>(buildExtraLongVariantsList(), adapter);
+        assertThat(variantsCruncher.getMatrix().capacity(), equalTo(7560));
+        clearMatrix(variantsCruncher);
+        Map<String, String> typeToValueMap = variantsCruncher.getTypeToValueMap(variant);
+        assertEquals(coordinates, typeToValueMap);
+        variantsCruncher.insert(coordinates, "Green_S_Installation_XX_Premium_B");
+        assertEquals(variantsCruncher.get(typeToValueMap), "Green_S_Installation_XX_Premium_B");
+        assertThat(variantsCruncher.getMatrix().size(), equalTo(1));
+    }
+
     private static List<Variant> buildSimpleVariantsList() {
         List<Variant> variants = new ArrayList<>();
         Variant v;
